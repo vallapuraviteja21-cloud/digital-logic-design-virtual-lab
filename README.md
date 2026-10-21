@@ -1,5 +1,4 @@
-# digital-logic-design-virtual-lab
-An interactive DLD virtual laboratory for B.Tech ECE students .
+
 # Digital Logic Design Virtual Lab
 
 An interactive web-based laboratory designed to help
