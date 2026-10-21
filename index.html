@@ -1,0 +1,1228 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Digital Logic Design Virtual Lab</title>
+
+    <style>
+        /* Basic page design */
+        :root {
+            --background: #0a0f1d;
+            --card: #11192e;
+            --border: #263653;
+            --text: #e2e8f0;
+            --muted: #94a3b8;
+            --blue: #3b82f6;
+            --cyan: #06b6d4;
+            --green: #10b981;
+            --red: #ef4444;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background: var(--background);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            background: var(--card);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .navbar {
+            max-width: 1200px;
+            margin: auto;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .brand {
+            color: var(--cyan);
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        nav {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        button {
+            cursor: pointer;
+            border: none;
+            border-radius: 6px;
+            padding: 10px 14px;
+            font-size: 14px;
+        }
+
+        .nav-button {
+            background: transparent;
+            color: var(--muted);
+        }
+
+        .nav-button:hover,
+        .nav-button.active {
+            background: #1e3152;
+            color: var(--cyan);
+        }
+
+        main {
+            flex: 1;
+            width: 100%;
+            max-width: 1200px;
+            margin: auto;
+            padding: 25px 20px;
+        }
+
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            min-width: 0;
+        }
+
+        h1,
+        h2,
+        h3 {
+            color: white;
+            margin-bottom: 12px;
+        }
+
+        p {
+            color: var(--muted);
+            line-height: 1.7;
+            margin-bottom: 10px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
+            gap: 20px;
+        }
+
+        .primary-button {
+            background: var(--blue);
+            color: white;
+            margin: 5px 3px 5px 0;
+        }
+
+        .secondary-button {
+            background: #24334c;
+            color: white;
+            border: 1px solid var(--border);
+            margin: 4px 3px 4px 0;
+        }
+
+        button:hover {
+            opacity: 0.85;
+        }
+
+        .gate-button.selected {
+            background: var(--cyan);
+            color: #07111d;
+        }
+
+        .input-row,
+        .output-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            padding: 12px;
+            background: #0a1222;
+            border: 1px solid var(--border);
+            border-radius: 7px;
+            margin: 10px 0;
+        }
+
+        .toggle {
+            width: 60px;
+            font-weight: bold;
+            background: #263449;
+            color: white;
+        }
+
+        .toggle.on {
+            background: var(--green);
+        }
+
+        .led {
+            display: inline-block;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #334155;
+            border: 2px solid #64748b;
+            vertical-align: middle;
+            margin-left: 8px;
+        }
+
+        .led.on {
+            background: var(--green);
+            border-color: #6ee7b7;
+            box-shadow: 0 0 10px var(--green);
+        }
+
+        .led.off {
+            background: var(--red);
+            border-color: #fca5a5;
+        }
+
+        .formula {
+            color: var(--cyan);
+            font-family: monospace;
+            font-size: 16px;
+            margin: 12px 0;
+            overflow-wrap: anywhere;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+            margin-top: 12px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: center;
+            font-size: 14px;
+        }
+
+        th,
+        td {
+            padding: 10px;
+            border: 1px solid var(--border);
+        }
+
+        th {
+            background: #1b2943;
+            color: var(--cyan);
+        }
+
+        tr.current {
+            background: #164e63;
+            color: white;
+            font-weight: bold;
+        }
+
+        .schematic {
+            background: #080d18;
+            border: 1px dashed var(--border);
+            border-radius: 8px;
+            padding: 20px;
+            margin: 15px 0;
+            text-align: center;
+            color: var(--cyan);
+        }
+
+        .kmap {
+            display: grid;
+            grid-template-columns: 55px 1fr 1fr;
+            gap: 5px;
+            margin: 15px 0;
+        }
+
+        .kmap-cell {
+            background: #1b2943;
+            color: white;
+            border: 1px solid var(--border);
+            padding: 20px 5px;
+            font-weight: bold;
+        }
+
+        .kmap-cell.active {
+            background: #065f46;
+            color: #a7f3d0;
+        }
+
+        .kmap-label {
+            display: grid;
+            place-items: center;
+            background: #263449;
+            border-radius: 5px;
+        }
+
+        .note {
+            background: #0a1222;
+            padding: 14px;
+            border-radius: 7px;
+            border: 1px solid var(--border);
+            margin-top: 15px;
+        }
+
+        .theory-list {
+            padding-left: 22px;
+            color: var(--muted);
+            line-height: 2;
+        }
+
+        footer {
+            background: var(--card);
+            border-top: 1px solid var(--border);
+            text-align: center;
+            padding: 18px;
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        @media (max-width: 600px) {
+            .navbar {
+                align-items: flex-start;
+            }
+
+            nav {
+                width: 100%;
+            }
+
+            .nav-button {
+                padding: 8px;
+                font-size: 12px;
+            }
+
+            main {
+                padding: 16px 12px;
+            }
+
+            .card {
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Website header and navigation -->
+    <header>
+        <div class="navbar">
+            <div class="brand">DLD Virtual Lab</div>
+
+            <nav>
+                <button class="nav-button active" data-page="home">Home</button>
+                <button class="nav-button" data-page="simulator">Gate Simulator</button>
+                <button class="nav-button" data-page="truth-tables">Truth Tables</button>
+                <button class="nav-button" data-page="boolean">Boolean & K-Map</button>
+                <button class="nav-button" data-page="circuits">Circuits</button>
+                <button class="nav-button" data-page="theory">Learn DLD</button>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+
+        <!-- HOME PAGE -->
+        <section id="home" class="page active">
+            <div class="card">
+                <h1>Digital Logic Design Virtual Lab</h1>
+                <p>
+                    Welcome to the DLD Virtual Lab for B.Tech ECE students.
+                    Learn digital logic gates, explore truth tables, simplify
+                    Boolean expressions and simulate basic digital circuits.
+                </p>
+
+                <button class="primary-button" data-open-page="simulator">
+                    Start Gate Simulation
+                </button>
+
+                <button class="secondary-button" data-open-page="circuits">
+                    Explore Digital Circuits
+                </button>
+            </div>
+
+            <div class="grid">
+                <div class="card">
+                    <h3>Logic Gates</h3>
+                    <p>Experiment with AND, OR, NOT, NAND, NOR, XOR and XNOR gates.</p>
+                    <button class="secondary-button" data-open-page="simulator">
+                        Open Simulator
+                    </button>
+                </div>
+
+                <div class="card">
+                    <h3>Truth Tables</h3>
+                    <p>Understand the output of every standard logic gate.</p>
+                    <button class="secondary-button" data-open-page="truth-tables">
+                        View Tables
+                    </button>
+                </div>
+
+                <div class="card">
+                    <h3>Boolean Algebra</h3>
+                    <p>Learn Boolean laws and simplify expressions using a K-map.</p>
+                    <button class="secondary-button" data-open-page="boolean">
+                        Open K-Map
+                    </button>
+                </div>
+
+                <div class="card">
+                    <h3>Combinational Circuits</h3>
+                    <p>Study half adders, full adders and 2:1 multiplexers.</p>
+                    <button class="secondary-button" data-open-page="circuits">
+                        Open Circuits
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- LOGIC GATE SIMULATOR -->
+        <section id="simulator" class="page">
+            <div class="grid">
+                <div class="card">
+                    <h2>Logic Gate Simulator</h2>
+                    <p>Select a gate and change the inputs to see its output.</p>
+
+                    <div id="gateButtons"></div>
+
+                    <div class="input-row">
+                        <span>Input A</span>
+                        <button class="toggle" id="inputAButton">0</button>
+                    </div>
+
+                    <div class="input-row" id="inputBRow">
+                        <span>Input B</span>
+                        <button class="toggle" id="inputBButton">0</button>
+                    </div>
+
+                    <button class="secondary-button" id="resetInputsButton">
+                        Reset Inputs
+                    </button>
+
+                    <div class="note">
+                        <div class="output-row">
+                            <strong>Output Y</strong>
+                            <strong>
+                                <span id="gateOutput">0</span>
+                                <span id="gateLed" class="led off"></span>
+                            </strong>
+                        </div>
+
+                        <p id="gateFormula" class="formula"></p>
+                        <p id="gateExplanation"></p>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2>Gate Diagram</h2>
+                    <div class="schematic" id="gateDiagram">
+                        Select a logic gate to begin.
+                    </div>
+
+                    <h3>Truth Table</h3>
+                    <div class="table-wrapper">
+                        <table id="simulatorTable"></table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TRUTH TABLE DIRECTORY -->
+        <section id="truth-tables" class="page">
+            <div class="card">
+                <h2>Logic Gate Truth Tables</h2>
+                <p>
+                    These tables show all possible input combinations and their
+                    corresponding outputs.
+                </p>
+            </div>
+
+            <div class="grid" id="allTruthTables"></div>
+        </section>
+
+        <!-- BOOLEAN ALGEBRA AND K-MAP -->
+        <section id="boolean" class="page">
+            <div class="grid">
+                <div class="card">
+                    <h2>Boolean Algebra Laws</h2>
+
+                    <div class="note">
+                        <strong>Identity Laws</strong>
+                        <p class="formula">A · 1 = A</p>
+                        <p class="formula">A + 0 = A</p>
+                    </div>
+
+                    <div class="note">
+                        <strong>Null Laws</strong>
+                        <p class="formula">A · 0 = 0</p>
+                        <p class="formula">A + 1 = 1</p>
+                    </div>
+
+                    <div class="note">
+                        <strong>Idempotent Laws</strong>
+                        <p class="formula">A · A = A</p>
+                        <p class="formula">A + A = A</p>
+                    </div>
+
+                    <div class="note">
+                        <strong>Complement Laws</strong>
+                        <p class="formula">A · A' = 0</p>
+                        <p class="formula">A + A' = 1</p>
+                    </div>
+
+                    <div class="note">
+                        <strong>De Morgan's Theorems</strong>
+                        <p class="formula">(A · B)' = A' + B'</p>
+                        <p class="formula">(A + B)' = A' · B'</p>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2>2-Variable K-Map Solver</h2>
+                    <p>
+                        Click a cell to change its value from 0 to 1.
+                        The simplified Sum of Products expression updates automatically.
+                    </p>
+
+                    <div class="kmap">
+                        <div class="kmap-label">A / B</div>
+                        <div class="kmap-label">B = 0</div>
+                        <div class="kmap-label">B = 1</div>
+
+                        <div class="kmap-label">A = 0</div>
+                        <button class="kmap-cell" data-minterm="0">m0: 0</button>
+                        <button class="kmap-cell" data-minterm="1">m1: 0</button>
+
+                        <div class="kmap-label">A = 1</div>
+                        <button class="kmap-cell" data-minterm="2">m2: 0</button>
+                        <button class="kmap-cell" data-minterm="3">m3: 0</button>
+                    </div>
+
+                    <div class="note">
+                        <strong>Minimized SOP Expression</strong>
+                        <p class="formula" id="kmapResult">Y = 0</p>
+                    </div>
+
+                    <button class="secondary-button" id="clearKmapButton">
+                        Clear K-Map
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- COMBINATIONAL CIRCUITS -->
+        <section id="circuits" class="page">
+            <div class="card">
+                <h2>Combinational Circuit Simulator</h2>
+
+                <button class="primary-button" data-circuit="half">
+                    Half Adder
+                </button>
+
+                <button class="secondary-button" data-circuit="full">
+                    Full Adder
+                </button>
+
+                <button class="secondary-button" data-circuit="mux">
+                    2:1 Multiplexer
+                </button>
+            </div>
+
+            <div class="grid">
+                <div class="card">
+                    <h2 id="circuitTitle">Half Adder</h2>
+                    <p id="circuitDescription">
+                        Adds two one-bit binary inputs and produces Sum and Carry.
+                    </p>
+
+                    <div id="circuitInputs"></div>
+
+                    <div class="note">
+                        <h3>Output Status</h3>
+                        <div id="circuitOutputs"></div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2>Circuit Truth Table</h2>
+                    <div class="table-wrapper">
+                        <table id="circuitTable"></table>
+                    </div>
+
+                    <div class="note">
+                        <p id="circuitFormula" class="formula"></p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- LEARN DLD -->
+        <section id="theory" class="page">
+            <div class="card">
+                <h2>Learn Digital Logic Design</h2>
+                <p>
+                    Important concepts for DLD laboratory experiments,
+                    assignments and examinations.
+                </p>
+            </div>
+
+            <div class="grid">
+                <div class="card">
+                    <h3>1. Basic Logic Gates</h3>
+                    <ul class="theory-list">
+                        <li>AND: output is 1 when both inputs are 1.</li>
+                        <li>OR: output is 1 when at least one input is 1.</li>
+                        <li>NOT: output is the opposite of the input.</li>
+                        <li>NAND: opposite of the AND output.</li>
+                        <li>NOR: opposite of the OR output.</li>
+                        <li>XOR: output is 1 when inputs are different.</li>
+                        <li>XNOR: output is 1 when inputs are equal.</li>
+                    </ul>
+                </div>
+
+                <div class="card">
+                    <h3>2. Universal Gates</h3>
+                    <p>
+                        NAND and NOR are called universal gates because any Boolean
+                        function can be implemented using only NAND gates or only NOR gates.
+                    </p>
+
+                    <p class="formula">NOT using NAND: Y = (A · A)' = A'</p>
+                    <p class="formula">NOT using NOR: Y = (A + A)' = A'</p>
+                    <p class="formula">AND using NAND: Y = ((A · B)')'</p>
+                </div>
+
+                <div class="card">
+                    <h3>3. Half Adder</h3>
+                    <p>A half adder adds two one-bit binary numbers.</p>
+                    <p class="formula">Sum = A XOR B</p>
+                    <p class="formula">Carry = A AND B</p>
+                </div>
+
+                <div class="card">
+                    <h3>4. Full Adder</h3>
+                    <p>A full adder adds three bits: A, B and carry input.</p>
+                    <p class="formula">Sum = A XOR B XOR Cin</p>
+                    <p class="formula">Cout = AB + ACin + BCin</p>
+                </div>
+
+                <div class="card">
+                    <h3>5. Multiplexer</h3>
+                    <p>
+                        A multiplexer selects one of its input signals and sends it
+                        to the output according to the select line.
+                    </p>
+                    <p class="formula">Y = S' · I0 + S · I1</p>
+                </div>
+
+                <div class="card">
+                    <h3>6. Boolean Algebra</h3>
+                    <p>
+                        Boolean algebra uses binary values 0 and 1 to describe and
+                        simplify digital logic circuits.
+                    </p>
+                    <p>
+                        K-maps help simplify Boolean expressions by grouping adjacent
+                        cells containing 1.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer>
+        Digital Logic Design Virtual Lab | B.Tech ECE
+    </footer>
+
+    <script>
+        // Store the current gate and input values.
+        let selectedGate = "AND";
+        let inputA = 0;
+        let inputB = 0;
+
+        // All seven standard logic gates.
+        const gateList = [
+            "AND", "OR", "NOT", "NAND", "NOR", "XOR", "XNOR"
+        ];
+
+        // Change the page when a navigation button is clicked.
+        function showPage(pageName) {
+            document.querySelectorAll(".page").forEach(function(page) {
+                page.classList.toggle("active", page.id === pageName);
+            });
+
+            document.querySelectorAll(".nav-button").forEach(function(button) {
+                button.classList.toggle(
+                    "active",
+                    button.dataset.page === pageName
+                );
+            });
+        }
+
+        document.querySelectorAll("[data-page]").forEach(function(button) {
+            button.addEventListener("click", function() {
+                showPage(button.dataset.page);
+            });
+        });
+
+        document.querySelectorAll("[data-open-page]").forEach(function(button) {
+            button.addEventListener("click", function() {
+                showPage(button.dataset.openPage);
+            });
+        });
+
+        // Calculate the output of a selected gate.
+        function calculateGate(gate, a, b) {
+            switch (gate) {
+                case "AND":
+                    return a & b;
+                case "OR":
+                    return a | b;
+                case "NOT":
+                    return a ? 0 : 1;
+                case "NAND":
+                    return (a & b) ? 0 : 1;
+                case "NOR":
+                    return (a | b) ? 0 : 1;
+                case "XOR":
+                    return a ^ b;
+                case "XNOR":
+                    return a === b ? 1 : 0;
+                default:
+                    return 0;
+            }
+        }
+
+        // Display the available gate buttons.
+        function createGateButtons() {
+            const container = document.getElementById("gateButtons");
+            container.innerHTML="";
+
+
+            gateList.forEach(function(gate)
+             {
+                const button = document.createElement("button");
+                button.textContent = gate;
+                button.className = "secondary-button gate-button";
+                if(gate== selectedGate){
+                    button.classList.add("selected")
+                }
+
+                button.addEventListener("click", function() {
+                    selectedGate = gate;
+                    createGateButtons();
+                    updateGate();
+                });
+
+                if (gate === selectedGate) {
+                    button.classList.add("selected");
+                }
+
+                container.appendChild(button);
+            });
+        }
+
+        // Show the formula and explanation for each gate.
+        function getGateFormula(gate) {
+            const formulas = {
+                AND: ["Y = A · B", "Output is 1 only when both inputs are 1."],
+                OR: ["Y = A + B", "Output is 1 when at least one input is 1."],
+                NOT: ["Y = A'", "Output is the opposite of input A."],
+                NAND: ["Y = (A · B)'", "Output is 0 only when both inputs are 1."],
+                NOR: ["Y = (A + B)'", "Output is 1 only when both inputs are 0."],
+                XOR: ["Y = A ⊕ B", "Output is 1 when the inputs are different."],
+                XNOR: ["Y = (A ⊕ B)'", "Output is 1 when the inputs are equal."]
+            };
+
+            return formulas[gate];
+        }
+
+        // Update the simulator whenever an input changes.
+        function updateGate() {
+            const output = calculateGate(selectedGate, inputA, inputB);
+            const isNotGate = selectedGate === "NOT";
+
+            document.getElementById("inputAButton").textContent = inputA;
+            document.getElementById("inputBButton").textContent = inputB;
+
+            document.getElementById("inputAButton").classList.toggle(
+                "on", inputA === 1
+            );
+
+            document.getElementById("inputBButton").classList.toggle(
+                "on", inputB === 1
+            );
+
+            document.getElementById("inputBRow").style.display =
+                isNotGate ? "none" : "flex";
+
+            document.getElementById("gateOutput").textContent = output;
+
+            document.getElementById("gateLed").className =
+                "led " + (output ? "on" : "off");
+
+            const explanation = getGateFormula(selectedGate);
+
+            document.getElementById("gateFormula").textContent = explanation[0];
+            document.getElementById("gateExplanation").textContent = explanation[1];
+
+            document.getElementById("gateDiagram").textContent =
+                "Input A: " + inputA +
+                (isNotGate ? "" : " | Input B: " + inputB) +
+                "  →  " + selectedGate +
+                "  →  Output Y: " + output;
+
+            updateSimulatorTable();
+        }
+
+        // Generate the truth table for the selected gate.
+        function updateSimulatorTable() {
+            const isNotGate = selectedGate === "NOT";
+
+            let html = isNotGate ?
+                "<tr><th>A</th><th>Y</th></tr>" :
+                "<tr><th>A</th><th>B</th><th>Y</th></tr>";
+
+            for (let a = 0; a <= 1; a++) {
+                for (let b = 0; b <= (isNotGate ? 0 : 1); b++) {
+                    const output = calculateGate(selectedGate, a, b);
+
+                    const isCurrent = a === inputA &&
+                        (isNotGate || b === inputB);
+
+                    html += '<tr class="' + (isCurrent ? "current" : "") + '">';
+                    html += "<td>" + a + "</td>";
+
+                    if (!isNotGate) {
+                        html += "<td>" + b + "</td>";
+                    }
+
+                    html += "<td>" + output + "</td></tr>";
+                }
+            }
+
+            document.getElementById("simulatorTable").innerHTML = html;
+        }
+
+        document.getElementById("inputAButton").addEventListener("click", function() {
+            inputA = inputA === 0 ? 1 : 0;
+            updateGate();
+        });
+
+        document.getElementById("inputBButton").addEventListener("click", function() {
+            inputB = inputB === 0 ? 1 : 0;
+            updateGate();
+        });
+
+        document.getElementById("resetInputsButton").addEventListener("click", function() {
+            inputA = 0;
+            inputB = 0;
+            updateGate();
+        });
+
+        // Build truth tables for all seven gates.
+        function createAllTruthTables() {
+            const container = document.getElementById("allTruthTables");
+
+            gateList.forEach(function(gate) {
+                const card = document.createElement("div");
+                card.className = "card";
+
+                let html = "<h3>" + gate + " Gate</h3>";
+
+                if (gate === "NOT") {
+                    html += "<p class='formula'>Y = A'</p>";
+                    html += "<table><tr><th>A</th><th>Y</th></tr>";
+
+                    for (let a = 0; a <= 1; a++) {
+                        html += "<tr><td>" + a + "</td><td>" +
+                            calculateGate(gate, a, 0) + "</td></tr>";
+                    }
+                } else {
+                    html += "<p class='formula'>" +
+                        getGateFormula(gate)[0] + "</p>";
+
+                    html += "<table><tr><th>A</th><th>B</th><th>Y</th></tr>";
+
+                    for (let a = 0; a <= 1; a++) {
+                        for (let b = 0; b <= 1; b++) {
+                            html += "<tr><td>" + a + "</td><td>" + b +
+                                "</td><td>" + calculateGate(gate, a, b) +
+                                "</td></tr>";
+                        }
+                    }
+                }
+
+                html += "</table>";
+                card.innerHTML = html;
+                container.appendChild(card);
+            });
+        }
+
+        // Two-variable K-map: cells are ordered m0, m1, m2, m3.
+        const minterms = [0, 0, 0, 0];
+
+        function updateKmap() {
+            document.querySelectorAll("[data-minterm]").forEach(function(cell) {
+                const index = Number(cell.dataset.minterm);
+                cell.textContent = "m" + index + ": " + minterms[index];
+                cell.classList.toggle("active", minterms[index] === 1);
+            });
+
+            document.getElementById("kmapResult").textContent =
+                "Y = " + simplifyKmap();
+        }
+
+        // Simplify the four-cell K-map using valid adjacent groups.
+        function simplifyKmap() {
+            const m = minterms;
+
+            if (m.every(value => value === 0)) return "0";
+            if (m.every(value => value === 1)) return "1";
+
+            const terms = [];
+
+            // Four cells together.
+            if (m.every(value => value === 1)) return "1";
+
+            // Pairs where A = 0 or A = 1.
+            if (m[0] && m[1]) terms.push("A'");
+            if (m[2] && m[3]) terms.push("A");
+
+            // Pairs where B = 0 or B = 1.
+            if (m[0] && m[2]) terms.push("B'");
+            if (m[1] && m[3]) terms.push("B");
+
+            // Diagonal ones cannot be grouped together.
+            // Keep only the minterms not covered by a valid pair.
+            const covered = [false, false, false, false];
+
+            if (m[0] && m[1]) covered[0] = covered[1] = true;
+            if (m[2] && m[3]) covered[2] = covered[3] = true;
+            if (m[0] && m[2]) covered[0] = covered[2] = true;
+            if (m[1] && m[3]) covered[1] = covered[3] = true;
+
+            const pairTerms = [];
+
+            if (m[0] && m[1]) pairTerms.push("A'");
+            if (m[2] && m[3]) pairTerms.push("A");
+            if (m[0] && m[2]) pairTerms.push("B'");
+            if (m[1] && m[3]) pairTerms.push("B");
+
+            // Enumerate the possible pairs and find a minimum cover.
+            const groups = [{
+                    cells: [0, 1],
+                    term: "A'"
+                },
+                {
+                    cells: [2, 3],
+                    term: "A"
+                },
+                {
+                    cells: [0, 2],
+                    term: "B'"
+                },
+                {
+                    cells: [1, 3],
+                    term: "B"
+                }
+            ];
+
+            let best = null;
+
+            for (let mask = 1; mask < (1 << groups.length); mask++) {
+                const selected = groups.filter((group, i) => mask & (1 << i));
+                const coveredCells = new Set();
+
+                selected.forEach(group => {
+                    group.cells.forEach(cell => coveredCells.add(cell));
+                });
+
+                const valid = m.every((value, i) =>
+                    value === 0 || coveredCells.has(i)
+                );
+
+                if (!valid) continue;
+
+                const literals = selected.reduce(
+                    (total, group) => total + group.term.length, 0
+                );
+
+                const candidate = {
+                    count: selected.length,
+                    literals: literals,
+                    terms: selected.map(group => group.term)
+                };
+
+                if (
+                    best === null ||
+                    candidate.count < best.count ||
+                    (candidate.count === best.count &&
+                        candidate.literals < best.literals)
+                ) {
+                    best = candidate;
+                }
+            }
+
+            if (best) {
+                // Add isolated ones not covered by the selected groups.
+                const coveredByBest = new Set();
+
+                groups.forEach(group => {
+                    if (best.terms.includes(group.term)) {
+                        group.cells.forEach(cell => coveredByBest.add(cell));
+                    }
+                });
+
+                for (let i = 0; i < 4; i++) {
+                    if (m[i] && !coveredByBest.has(i)) {
+                        best.terms.push([
+                            "A'B'", "A'B", "AB'", "AB"
+                        ][i]);
+                    }
+                }
+
+                return best.terms.join(" + ");
+            }
+
+            return "0";
+        }
+
+        document.querySelectorAll("[data-minterm]").forEach(function(cell) {
+            cell.addEventListener("click", function() {
+                const index = Number(cell.dataset.minterm);
+                minterms[index] = minterms[index] === 0 ? 1 : 0;
+                updateKmap();
+            });
+        });
+
+        document.getElementById("clearKmapButton").addEventListener("click", function() {
+            minterms.fill(0);
+            updateKmap();
+        });
+
+        // Circuit simulator input values.
+        let selectedCircuit = "half";
+        let circuitInputs = {
+            A: 0,
+            B: 0,
+            Cin: 0,
+            S: 0,
+            I0: 0,
+            I1: 0
+        };
+
+        const circuitDetails = {
+            half: {
+                title: "Half Adder",
+                description: "Adds two one-bit binary inputs.",
+                inputs: ["A", "B"],
+                outputs: ["Sum", "Carry"],
+                formula: "Sum = A XOR B; Carry = A AND B"
+            },
+            full: {
+                title: "Full Adder",
+                description: "Adds A, B and the carry input Cin.",
+                inputs: ["A", "B", "Cin"],
+                outputs: ["Sum", "Cout"],
+                formula: "Sum = A XOR B XOR Cin; Cout = AB + ACin + BCin"
+            },
+            mux: {
+                title: "2:1 Multiplexer",
+                description: "Selects I0 when S = 0 and I1 when S = 1.",
+                inputs: ["I0", "I1", "S"],
+                outputs: ["Y"],
+                formula: "Y = S' · I0 + S · I1"
+            }
+        };
+
+        // Select a circuit.
+        function loadCircuit(circuitName) {
+            selectedCircuit = circuitName;
+
+            document.querySelectorAll("[data-circuit]").forEach(function(button) {
+                button.className = button.dataset.circuit === circuitName ?
+                    "primary-button" :
+                    "secondary-button";
+            });
+
+            const details = circuitDetails[circuitName];
+
+            document.getElementById("circuitTitle").textContent = details.title;
+            document.getElementById("circuitDescription").textContent =
+                details.description;
+
+            document.getElementById("circuitFormula").textContent = details.formula;
+
+            createCircuitInputs();
+            updateCircuit();
+        }
+
+        // Draw the input controls for the selected circuit.
+        function createCircuitInputs() {
+            const container = document.getElementById("circuitInputs");
+            container.innerHTML = "";
+
+            circuitDetails[selectedCircuit].inputs.forEach(function(name) {
+                const row = document.createElement("div");
+                row.className = "input-row";
+
+                const label = document.createElement("span");
+                label.textContent = "Input " + name;
+
+                const button = document.createElement("button");
+                button.className = "toggle";
+                button.textContent = circuitInputs[name];
+
+                button.addEventListener("click", function() {
+                    circuitInputs[name] = circuitInputs[name] === 0 ? 1 : 0;
+                    updateCircuit();
+                });
+
+                row.appendChild(label);
+                row.appendChild(button);
+                container.appendChild(row);
+            });
+        }
+
+        // Calculate the outputs of the selected circuit.
+        function calculateCircuit() {
+            const {
+                A,
+                B,
+                Cin,
+                S,
+                I0,
+                I1
+            } = circuitInputs;
+
+            if (selectedCircuit === "half") {
+                return {
+                    Sum: A ^ B,
+                    Carry: A & B
+                };
+            }
+
+            if (selectedCircuit === "full") {
+                return {
+                    Sum: A ^ B ^ Cin,
+                    Cout: (A & B) | (A & Cin) | (B & Cin)
+                };
+            }
+
+            return {
+                Y: S === 0 ? I0 : I1
+            };
+        }
+
+        // Update the outputs and truth table.
+        function updateCircuit() {
+            createCircuitInputs();
+
+            const outputs = calculateCircuit();
+            const outputContainer = document.getElementById("circuitOutputs");
+
+            outputContainer.innerHTML = "";
+
+            Object.entries(outputs).forEach(function(entry) {
+                const row = document.createElement("div");
+                row.className = "output-row";
+
+                const label = document.createElement("span");
+                label.textContent = entry[0];
+
+                const value = document.createElement("strong");
+                value.textContent = entry[1];
+
+                const led = document.createElement("span");
+                led.className = "led " + (entry[1] ? "on" : "off");
+
+                value.appendChild(led);
+                row.appendChild(label);
+                row.appendChild(value);
+                outputContainer.appendChild(row);
+            });
+
+            updateCircuitTable();
+        }
+
+        // Show every possible input combination.
+        function updateCircuitTable() {
+            const details = circuitDetails[selectedCircuit];
+            const inputs = details.inputs;
+            const outputNames = details.outputs;
+
+            let html = "<tr>";
+
+            inputs.forEach(name => html += "<th>" + name + "</th>");
+            outputNames.forEach(name => html += "<th>" + name + "</th>");
+
+            html += "</tr>";
+
+            const rowCount = Math.pow(2, inputs.length);
+
+            for (let row = 0; row < rowCount; row++) {
+                const values = {};
+
+                inputs.forEach(function(name, index) {
+                    values[name] = (row >> (inputs.length - index - 1)) & 1;
+                });
+
+                const previousInputs = circuitInputs;
+                circuitInputs = {
+                    ...previousInputs,
+                    ...values
+                };
+
+                const outputs = calculateCircuit();
+                let isCurrent = inputs.every(name =>
+                    values[name] === previousInputs[name]
+                );
+
+                html += '<tr class="' + (isCurrent ? "current" : "") + '">';
+
+                inputs.forEach(name => html += "<td>" + values[name] + "</td>");
+                outputNames.forEach(name => html += "<td>" + outputs[name] + "</td>");
+
+                html += "</tr>";
+                circuitInputs = previousInputs;
+            }
+
+            document.getElementById("circuitTable").innerHTML = html;
+        }
+
+        document.querySelectorAll("[data-circuit]").forEach(function(button) {
+            button.addEventListener("click", function() {
+                loadCircuit(button.dataset.circuit);
+            });
+        });
+
+        // Start the virtual lab.
+        createGateButtons();
+        createAllTruthTables();
+        updateGate();
+        updateKmap();
+        loadCircuit("half");
+    </script>
+
+</body>
+
+</html>
